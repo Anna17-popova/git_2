@@ -1,6 +1,5 @@
 import pygame
 import sys
-import os
 import random
 
 
@@ -70,7 +69,7 @@ class Snake:
 
     def crashed(self):
         if self.position[0] <= 2 or self.position[0] >= WIDTH - 6 \
-                or self.position[1] <= 4 or self.position[1] >= HEIGHT - 6:
+                or self.position[1] <= 4 or self.position[1] >= HEIGHT - 10:
             terminate()
         for cube in self.body[1:]:
             if self.position[0] == cube[0] and self.position[1] == cube[1]:
