@@ -4,9 +4,12 @@ import os
 import random
 
 pygame.init()
+pygame.mixer.init()
+pygame.mixer.music.load('music.mp3')
+sound = pygame.mixer.Sound('game_over.wav')
 size = WIDTH, HEIGHT = 500, 500
 screen = pygame.display.set_mode(size)
-pygame.display.set_caption('Змейка')
+pygame.display.set_caption('Snake')
 clock = pygame.time.Clock()
 SCORE = 0
 FPS = 5
@@ -44,9 +47,16 @@ def start_screen():
     intro_text = ["Snake", "",
                   "made by Anna,",
                   "with Pasha's help"]
+    button = 'START'
     fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH, HEIGHT))
     screen.blit(fon, (0, 0))
     font = pygame.font.Font(None, 70)
+    font1 = pygame.font.Font(None, 20)
+    rendered = font1.render(button, True, (255, 0, 0))
+    rect = rendered.get_rect()
+    rect.y = 40
+    rect.x = 300
+    screen.blit(rendered, rect)
     text_coord = 85
     for line in intro_text:
         string_rendered = font.render(line, True, (154, 48, 1))
@@ -64,7 +74,8 @@ def start_screen():
             elif event.type == pygame.MOUSEMOTION:
                 cursor.rect.topleft = event.pos
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                return  # начинаем игру
+                if (rect.x <= event.pos[0] <= rect.x + 150) and (rect.y <= event.pos[1] <= rect.y + 50):
+                    return
 
         intro_text = ["Snake", "",
                       "made by Anna,",
@@ -81,16 +92,23 @@ def start_screen():
             intro_rect.x = 10
             text_coord += intro_rect.height
             screen.blit(string_rendered, intro_rect)
+        font1 = pygame.font.Font(None, 50)
+        rendered = font1.render(button, True, (154, 48, 1))
+        rect = rendered.get_rect()
+        rect.y = 150
+        rect.x = 190
+        pygame.draw.rect(screen, (154, 48, 1), (rect.x - 5, rect.y - 5, 120, 50), width=2)
+        screen.blit(rendered, rect)
         if pygame.mouse.get_focused():
             all_sprites.draw(screen)
         pygame.display.flip()
         clock.tick(FPS)
 
 
-def gameover():
+def gameover(f):
+    pygame.mixer.music.stop()
     intro_text = ["GAME OVER!",
                   f"Score: {SCORE}"]
-
     fon = pygame.transform.scale(load_image('screen.jpg'), (WIDTH, HEIGHT))
     screen.blit(fon, (0, 0))
     font = pygame.font.Font(None, 50)
@@ -103,6 +121,11 @@ def gameover():
         intro_rect.x = 150
         text_coord += intro_rect.height
         screen.blit(string_rendered, intro_rect)
+    pygame.display.flip()
+    sound.play()
+    pygame.time.delay(3500)
+    pygame.quit()
+    sys.exit()
 
 
 class Ball:
@@ -167,8 +190,8 @@ class Snake:
                 self.flag = True
                 break
         if (self.position[0] <= 2 or self.position[0] > WIDTH - 5
-            or self.position[1] <= 5 or self.position[1] >= HEIGHT - 5) or (self.flag):
-            gameover()
+            or self.position[1] <= 5 or self.position[1] >= HEIGHT - 5) or self.flag:
+            gameover(False)
 
     def acceleration(self):
         if self.changed and SCORE % 3 == 0:
@@ -177,11 +200,10 @@ class Snake:
 
 
 start_screen()
-
 running = True
 snake = Snake()
 ball = Ball()
-
+pygame.mixer.music.play(-1)
 while running:
     keys = pygame.key.get_pressed()
     for event in pygame.event.get():
