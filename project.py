@@ -107,6 +107,8 @@ while running:
     snake.move()
     snake.draw()
     snake.crashed()
+    if pygame.mouse.get_focused():
+        all_sprites.draw(screen)
     pygame.display.flip()
     clock.tick(FPS)
 pygame.quit()
